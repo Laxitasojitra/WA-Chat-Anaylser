@@ -1,6 +1,7 @@
 
 import re
 import pandas as pd
+from textblob import TextBlob
 
 def preprocess(data):
     pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}\s-\s'
@@ -16,17 +17,24 @@ def preprocess(data):
 
     users = []
     messages = []
+    sentiments = []  # New list to store sentiment analysis results
     for message in df['user_message']:
         entry = re.split('([\w\W]+?):\s', message)
         if entry[1:]:  # user name
             users.append(entry[1])
-            messages.append(" ".join(entry[2:]))
+            message_text = " ".join(entry[2:])
+            messages.append(message_text)
+            sentiment = analyze_sentiment(message_text)  # Perform sentiment analysis
+            sentiments.append(sentiment)
         else:
             users.append('group_notification')
             messages.append(entry[0])
+            sentiments.append('Neutral')  # Assuming neutral sentiment for non-user messages
 
     df['user'] = users
     df['message'] = messages
+    df['sentiment'] = sentiments  # Add sentiment analysis results to DataFrame
+
     df.drop(columns=['user_message'], inplace=True)
 
     df['only_date'] = df['date'].dt.date
@@ -50,3 +58,13 @@ def preprocess(data):
     df['period'] = period
 
     return df
+
+def analyze_sentiment(message):
+    blob = TextBlob(message)
+    sentiment_score = blob.sentiment.polarity
+    if sentiment_score > 0:
+        return "Positive"
+    elif sentiment_score < 0:
+        return "Negative"
+    else:
+        return "Neutral"

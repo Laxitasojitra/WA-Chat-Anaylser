@@ -1,12 +1,16 @@
+
 from urlextract import URLExtract
 from wordcloud import WordCloud
 import pandas as pd
 from collections import Counter
+from textblob import TextBlob
 import emoji
+import regex
+import re
+import plotly.graph_objects as go
 
 extract = URLExtract()
-
-def fetch_stats(selected_user,df):
+def fetch_stats(selected_user, df):
 
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
@@ -138,16 +142,23 @@ def activity_heatmap(selected_user,df):
 
     return user_heatmap
 
+def analyze_sentiment(message):
+    blob = TextBlob(message)
+    sentiment_score = blob.sentiment.polarity
+    if sentiment_score > 0:
+        return "Positive"
+    elif sentiment_score < 0:
+        return "Negative"
+    else:
+        return "Neutral"
 
+def word_frequency_by_user(selected_user, df):
+    if selected_user != 'Overall':
+        df = df[df['user'] == selected_user]
 
+    words = []
+    for message in df['message']:
+        words.extend(message.lower().split())
 
-
-
-
-
-
-
-
-
-
-
+    word_counts = Counter(words)
+    return pd.DataFrame(word_counts.most_common(20), columns=['Word', 'Frequency'])
