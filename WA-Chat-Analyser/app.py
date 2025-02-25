@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 st.set_page_config(
-    page_title="WA-chat analyser",
+    page_title="Whatsapp-Chat-Analyser",
     page_icon="chat.png",
     layout="centered",
     initial_sidebar_state="expanded"  # Optional: can be "auto", "expanded", or "collapsed"
@@ -33,7 +33,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("Welcome to WhatsApp Chat Analyzer")
+# st.title("Welcome to WhatsApp Chat Analyzer")
 st.sidebar.title("Whatsapp Chat Analyzer")
 
 uploaded_file = st.sidebar.file_uploader("Choose a file")
@@ -58,17 +58,24 @@ if uploaded_file is not None:
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.header("Total Messages")
-            st.title(num_messages)
+            st.markdown(
+                "<div style='text-align: center;'><h4>Total Messages</h4><h2 style='color: #00FF00; margin-top: -10px;'>{}</h2></div>".format(
+                    num_messages), unsafe_allow_html=True)
+
         with col2:
-            st.header("Total Words")
-            st.title(words)
+            st.markdown(
+                "<div style='text-align: center;'><h4>Total Words</h4><h2 style='color: #00FF00; margin-top: -10px;'>{}</h2></div>".format(
+                    words), unsafe_allow_html=True)
+
         with col3:
-            st.header("Media Shared")
-            st.title(num_media_messages)
+            st.markdown(
+                "<div style='text-align: center;'><h4>Media Shared</h4><h2 style='color: #00FF00; margin-top: -10px;'>{}</h2></div>".format(
+                    num_media_messages), unsafe_allow_html=True)
+
         with col4:
-            st.header("Links Shared")
-            st.title(num_links)
+            st.markdown(
+                "<div style='text-align: center;'><h4>Links Shared</h4><h2 style='color: #00FF00; margin-top: -10px;'>{}</h2></div>".format(
+                    num_links), unsafe_allow_html=True)
 
         # Monthly timeline
         st.title("Monthly Timeline")
