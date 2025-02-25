@@ -3,6 +3,37 @@ import preprocessor,helper
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+st.set_page_config(
+    page_title="WA-chat analyser",
+    page_icon="chat.png",
+    layout="centered",
+    initial_sidebar_state="expanded"  # Optional: can be "auto", "expanded", or "collapsed"
+)
+
+# Custom CSS
+st.markdown(
+    """
+    <style>
+        /* Main Background  */
+        [data-testid="stAppViewContainer"], [data-testid="stApp"] {
+            background-color: #000000 !important;
+        }
+
+        /* Change Sidebar Background (WhatsApp Green) */
+        [data-testid="stSidebar"] {
+            background-color: #075E54;
+        }
+
+        /* Remove Black Header Bar */
+        header {
+            background-color: #000000 !important;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.title("Welcome to WhatsApp Chat Analyzer")
 st.sidebar.title("Whatsapp Chat Analyzer")
 
 uploaded_file = st.sidebar.file_uploader("Choose a file")
@@ -152,3 +183,4 @@ if uploaded_file is not None:
         else:
             word_freq_df = helper.word_frequency_by_user(selected_user, df)
             st.table(word_freq_df)
+
