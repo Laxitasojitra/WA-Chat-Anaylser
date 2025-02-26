@@ -83,13 +83,14 @@ def most_common_words(selected_user,df):
     most_common_df = pd.DataFrame(Counter(words).most_common(20))
     return most_common_df
 
-def emoji_helper(selected_user,df):
-    if selected_user != 'Overall':
-        df = df[df['user'] == selected_user]
+def emoji_helper(selected_user, df):
+    if selected_user != "Overall":
+        df = df[df["user"] == selected_user]
 
     emojis = []
-    for message in df['message']:
-        emojis.extend([c for c in message if emoji.is_emoji(c)])
+    emoji_pattern = regex.compile(r"\p{So}")
+    for message in df["message"]:
+        emojis.extend(emoji_pattern.findall(message))
 
     emoji_df = pd.DataFrame(Counter(emojis).most_common(len(Counter(emojis))))
 
@@ -162,3 +163,4 @@ def word_frequency_by_user(selected_user, df):
 
     word_counts = Counter(words)
     return pd.DataFrame(word_counts.most_common(20), columns=['Word', 'Frequency'])
+

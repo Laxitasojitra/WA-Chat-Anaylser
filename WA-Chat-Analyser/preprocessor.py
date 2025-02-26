@@ -4,7 +4,7 @@ import pandas as pd
 from textblob import TextBlob
 
 def preprocess(data):
-    pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}\s-\s'
+    pattern = r"\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}\s-\s"
 
     messages = re.split(pattern, data)[1:]
     dates = re.findall(pattern, data)
@@ -19,7 +19,7 @@ def preprocess(data):
     messages = []
     sentiments = []  # New list to store sentiment analysis results
     for message in df['user_message']:
-        entry = re.split('([\w\W]+?):\s', message)
+        entry = re.split(r"([\w\W]+?):\s", message)
         if entry[1:]:  # user name
             users.append(entry[1])
             message_text = " ".join(entry[2:])
@@ -68,3 +68,55 @@ def analyze_sentiment(message):
         return "Negative"
     else:
         return "Neutral"
+
+
+    #pdf
+from fpdf import FPDF
+
+
+def generate_pdf(selected_user, stats, sentiment_counts, emoji_df):
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Title
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(200, 10, "WhatsApp Chat Analysis Report", ln=True, align="C")
+    pdf.ln(10)
+
+    # User
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(200, 10, f"Analysis for: {selected_user}", ln=True, align="L")
+    pdf.ln(5)
+
+    # Stats
+    pdf.set_font("Arial", size=12)
+    for key, value in stats.items():
+        pdf.cell(200, 10, f"{key}: {value}", ln=True)
+
+    pdf.ln(10)
+
+    # Sentiment Analysis
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(200, 10, "Sentiment Analysis", ln=True, align="L")
+    pdf.ln(5)
+
+    for sentiment, count in sentiment_counts.items():
+        pdf.cell(200, 10, f"{sentiment}: {count}", ln=True)
+
+    pdf.ln(10)
+
+    # Emoji Analysis
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(200, 10, "Emoji Analysis", ln=True, align="L")
+    pdf.ln(5)
+
+    for index, row in emoji_df.iterrows():
+        emoji, count = row[0], row[1]
+        pdf.cell(200, 10, f"{emoji}: {count}", ln=True)
+
+    # Save PDF file
+    pdf_path = "WhatsApp_Chat_Report.pdf"
+    pdf.output(pdf_path)
+    return pdf_path

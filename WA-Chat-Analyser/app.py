@@ -2,6 +2,11 @@ import streamlit as st
 import preprocessor,helper
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.graph_objects as go
+from fpdf import FPDF
+import os
+import matplotlib.font_manager as fm
+
 
 st.set_page_config(
     page_title="Whatsapp-Chat-Analyser",
@@ -169,18 +174,33 @@ if uploaded_file is not None:
             sentiment_by_user = df.groupby('user')['sentiment'].value_counts().unstack().fillna(0)
             st.write(sentiment_by_user)
 
-            # emoji analysis
+            # Emoji analysis
+            plt.rcParams["font.family"] = "Noto Color Emoji"
+
             emoji_df = helper.emoji_helper(selected_user, df)
+            emoji_df = emoji_df[
+                emoji_df[0] != "group_notification"
+                ]  # Remove 'group_notification'
             st.title("Emoji Analysis")
+            st.write("Emoji analysis by count")
 
-            col1, col2 = st.columns(2)
+            # Display emoji list
+            # with st.expander("Emoji List"):
+            # emoji_df.columns = ["Emoji", "Count"]
+            st.dataframe(emoji_df)
 
-            with col1:
-                st.dataframe(emoji_df)
-            with col2:
-                fig, ax = plt.subplots()
-                ax.pie(emoji_df[1].head(), labels=emoji_df[0].head(), autopct="%0.2f")
-                st.pyplot(fig)
+            # Aggregate emojis by category or frequency
+            aggregated_data = (
+                emoji_df.groupby(0)[1].sum().nlargest(5)
+            )  # Example: Top 10 most frequent emojis
+
+            # Plot aggregated data using Plotly
+            fig = go.Figure(
+                data=[go.Bar(x=aggregated_data.index, y=aggregated_data.values)]
+            )
+            fig.update_layout(xaxis_title="Emoji", yaxis_title="Frequency")
+            st.write("Emoji analysis by chart")
+            st.plotly_chart(fig)
 
 
         # Word Frequency by User
@@ -191,3 +211,23 @@ if uploaded_file is not None:
             word_freq_df = helper.word_frequency_by_user(selected_user, df)
             st.table(word_freq_df)
 
+            # 📄 Generate and Download PDF Report at the end
+            stats = {
+                "Total Messages": num_messages,
+                "Total Words": words,
+                "Media Shared": num_media_messages,
+                "Links Shared": num_links
+            }
+
+            pdf_file = preprocessor.generate_pdf(selected_user, stats, sentiment_counts, emoji_df)
+
+            if os.path.exists(pdf_file):  # Ensure the file exists
+                with open(pdf_file, "rb") as pdf:
+                    st.download_button(
+                        label="📄 Download Analysis Report",
+                        data=pdf,
+                        file_name="WhatsApp_Chat_Report.pdf",
+                        mime="application/pdf"
+                    )
+            else:
+                st.error("⚠️ Error generating the PDF report.")
